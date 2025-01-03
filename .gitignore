@@ -1,0 +1,9 @@
+# Backend
+/backend/node_modules/
+/backend/.env
+/backend/src/config
+#Frontend
+/frontend/node_modules/
+#OS
+.vscode/
+Thumbs.db
