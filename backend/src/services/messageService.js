@@ -76,3 +76,12 @@ export const isOpen = async () => {
         return 'Hubo un error al obtener los horarios';
     }
 }
+
+export const addPedido = async (clienteData) => {
+    try {
+        botResponse = `Hola ${clienteData.nombre}, su direccion es ${clienteData.direccion} 😊\n`
+        return botResponse
+    } catch (error) {
+        console.error(error)
+    }
+}
