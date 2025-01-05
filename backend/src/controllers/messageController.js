@@ -2,25 +2,45 @@ import { getMenu, getHorarios, isOpen, addPedido } from '../services/messageServ
 
 let clienteData = {}
 let chatState = {}
+let add = false
 
 export const handleMessage = async (req, res) => {
     const { userMessage } = req.body;
     let botResponse = ''
     try {
         const message = userMessage.toLowerCase();
-
-        //Ejecuta si el cliente quiere realizar un pedido
+        //Ejecuta cuando se quiere realizar un pedido
         if (chatState.pedido) {
-            if (!clienteData.nombre) {
-                clienteData.nombre = userMessage
-                botResponse = '¿Cuál es su dirección? 😊\n'
-            } else if (!clienteData.direccion) {
-                clienteData.direccion = userMessage
-                botResponse = await addPedido(clienteData)
-                chatState.pedido = false
-            } else {
-                await addPedido(clienteData)
-                chatState.pedido = false
+            try {
+                if (!clienteData.nombre) {
+                    clienteData.nombre = userMessage
+                    botResponse = `${clienteData.nombre}, ¿Cuál es su dirección?\n`
+                } else
+                    if (!clienteData.direccion) {
+                        clienteData.direccion = userMessage
+                        botResponse = `¡Perfecto! ¿Qué desea pedir? 😊\n`
+                    } else
+                        if (!clienteData.pedido) {
+                            clienteData.pedido = userMessage
+                            botResponse = `${clienteData.nombre}, ¿Desea pedir algo más?\n`
+                        } else
+                            if (message.includes('si')) {
+                                add = true
+                                botResponse = '¿Que desea agregar?\n'
+                            } else
+                                if (add) {
+                                    clienteData.pedido += ` y ${userMessage}`
+                                    botResponse = await addPedido(clienteData)
+                                    chatState.pedido = false
+                                    add = false
+                                    clienteData = {}
+                                } else {
+                                    botResponse = await addPedido(clienteData)
+                                    chatState.pedido = false
+                                    clienteData = {}
+                                }
+            } catch (error) {
+                console.error('Error al solicitar datos al cliente', error)
             }
         } else {
             switch (true) {

@@ -1,5 +1,6 @@
 import Producto from '../models/producto.js';
 import Horario from '../models/horario.js';
+import Pedido from '../models/pedido.js';
 
 let botResponse = '';
 
@@ -45,7 +46,7 @@ export const isOpen = async () => {
                 ]
             }
         );
-        
+
         if (horarios.length === 0) {
             botResponse = 'No tenemos horarios para hoy.\n';
             return botResponse;
@@ -79,8 +80,48 @@ export const isOpen = async () => {
 
 export const addPedido = async (clienteData) => {
     try {
-        botResponse = `Hola ${clienteData.nombre}, su direccion es ${clienteData.direccion} 😊\n`
-        return botResponse
+        const productosPedido = clienteData.pedido.split('y').map((item) => item.trim());
+        const productosConCantidad = [];
+        for (const pedido of productosPedido) {
+            const regex = /^(\d+)\s+(.*)$/;
+            const match = pedido.match(regex);
+
+            if (!match) {
+                return `El formato del pedido "${pedido}" no es válido. Usa "cantidad nombre de producto".`;
+            }
+
+            const cantidad = parseInt(match[1], 10);
+            const nombreProducto = match[2].trim();
+
+            const producto = await Producto.findOne({
+                nombre: {
+                    $regex: new RegExp(`^${nombreProducto}$`, 'i')
+                }
+            });
+
+            if (!producto) {
+                return `El producto "${nombreProducto}" no está disponible. Por favor, revisa tu pedido.`;
+            }
+
+            productosConCantidad.push({ producto: producto._id, cantidad });
+        }
+
+        //Total
+        const total = await productosConCantidad.reduce(async (sumPromise, { producto, cantidad }) => {
+            const sum = await sumPromise;
+            const productoData = await Producto.findById(producto);
+            return sum + productoData.precio * cantidad;
+        }, Promise.resolve(0));
+
+        const nuevoPedido = new Pedido({
+            productos: productosConCantidad,
+            total,
+            cliente: { nombre: clienteData.nombre, direccion: clienteData.direccion }
+        });
+
+        await nuevoPedido.save();
+
+        return `${clienteData.nombre}, su pedido se realizó correctamente.\nSu total es de $${total}`;
     } catch (error) {
         console.error(error)
     }

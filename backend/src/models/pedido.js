@@ -1,10 +1,6 @@
 import mongoose from 'mongoose';
 
 const pedidoSchema = new mongoose.Schema({
-    cliente: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Cliente'
-    },
     productos: [{
         producto: {
             type: mongoose.Schema.Types.ObjectId,
@@ -24,7 +20,13 @@ const pedidoSchema = new mongoose.Schema({
     fecha: {
         type: Date,
         default: Date.now
-    }
+    },
+    cliente: [
+        {
+            nombre: String,
+            direccion: String
+        }
+    ]
 })
 
 export default mongoose.model('Pedido', pedidoSchema);
