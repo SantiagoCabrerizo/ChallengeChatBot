@@ -1,9 +1,16 @@
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import axios from 'axios'
 
 function App() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const messagesEndRef = useRef(null);
+
+  // Scroll automático
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   // Función para enviar mensaje
   const sendMessage = async () => {
     if (input.trim() === '') return;
@@ -14,12 +21,12 @@ function App() {
     setInput('');
 
     try {
-      //Llamada a la API
+      
       const response = await axios.post('http://localhost:4000/message', {
         userMessage: input
       });
 
-      // Agregar mensaje al chat
+      // Agregar mensajes
       setMessages((prevMessages) => [
         ...prevMessages,
         { text: response.data, sender: 'bot' },
@@ -50,6 +57,7 @@ function App() {
               </div>
             </div>
           ))}
+          <div ref={messagesEndRef}></div>
         </div>
 
         {/* Input */}

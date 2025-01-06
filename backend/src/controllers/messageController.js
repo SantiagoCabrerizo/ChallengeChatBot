@@ -1,5 +1,6 @@
 import { getMenu, getHorarios, isOpen, addPedido } from '../services/messageService.js';
 
+// Uso de variables globales solamente para el ejercicio
 let clienteData = {}
 let chatState = {}
 let add = false
@@ -7,6 +8,9 @@ let add = false
 export const handleMessage = async (req, res) => {
     const { userMessage } = req.body;
     let botResponse = ''
+
+    if (!userMessage) return res.status(400).send('Enviar mensaje')
+
     try {
         const message = userMessage.toLowerCase();
         //Ejecuta cuando se quiere realizar un pedido
@@ -18,7 +22,7 @@ export const handleMessage = async (req, res) => {
                 } else
                     if (!clienteData.direccion) {
                         clienteData.direccion = userMessage
-                        botResponse = `¡Perfecto! ¿Qué desea pedir? 😊\n`
+                        botResponse = `¡Perfecto! ¿Qué desea pedir? 😊\nPor favor, escribe en formato:\n"cantidad" "nombre del producto"\nEjemplo: 2 California\n`
                     } else
                         if (!clienteData.pedido) {
                             clienteData.pedido = userMessage
@@ -40,7 +44,8 @@ export const handleMessage = async (req, res) => {
                                     clienteData = {}
                                 }
             } catch (error) {
-                console.error('Error al solicitar datos al cliente', error)
+                console.error(error)
+                res.status(500).send('Error en servidor al solicitar datos al cliente');
             }
         } else {
             switch (true) {
@@ -56,7 +61,7 @@ export const handleMessage = async (req, res) => {
                 case (message.includes('abierto')):
                     botResponse = await isOpen()
                     break;
-                case (message.includes('pedido')):
+                case (message.includes('pedido') || message.includes('pedir')):
                     botResponse = 'Antes de realizar el pedido, ¿Cuál es tu nombre? 😊\n';
                     chatState.pedido = true
                     break
@@ -69,6 +74,7 @@ export const handleMessage = async (req, res) => {
         res.send(botResponse);
     } catch (error) {
         console.error(error);
+        res.status(500).send('Error en el servidor al procesar el mensaje');
     }
 
 }
