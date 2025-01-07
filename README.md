@@ -43,7 +43,7 @@ npm install
 ```
 3. Corre el servidor
 ```
-npm start
+npm run dev
 ```
 ## Ejemplos de mensajes que entiende el bot
 A continuación, algunos ejemplos de mensajes que el bot puede interpretar y responder:\n
