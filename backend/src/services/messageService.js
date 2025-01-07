@@ -34,6 +34,7 @@ export const isOpen = async () => {
         const horarioActual = (hora * 60) + minuto;
         const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
         const diaActual = dias[now.getDay()];
+
         if (hora === 0) {
             hora = 24;
         }
@@ -42,7 +43,8 @@ export const isOpen = async () => {
             {
                 $or: [
                     { dia: diaActual },
-                    { dia: { $regex: diaActual, $options: 'i' } }
+                    { dia: { $regex: diaActual, $options: 'i' } },
+                    { dia: { $regex: 'Lunes a Viernes', $options: 'i' } }
                 ]
             }
         );
@@ -87,7 +89,7 @@ export const addPedido = async (clienteData) => {
             const match = pedido.match(regex);
 
             if (!match) {
-                return `El formato del pedido "${pedido}" no es válido. Usa "cantidad nombre de producto".`;
+                return `El formato del pedido "${pedido}" no es válido.\nUsa "cantidad nombre de producto".`;
             }
 
             const cantidad = parseInt(match[1], 10);
