@@ -64,15 +64,18 @@ export const isOpen = async () => {
 
             const apertura = (aperturaHora * 60) + aperturaMinutos;
             const cierre = (cierreHora * 60) + cierreMinutos;
-            if (horarioActual >= apertura && horarioActual <= cierre) {
+
+            if (horarioActual >= apertura && horarioActual < cierre) {
                 botResponse = `¡Estamos abiertos! 😊\nPuedes realizar tu pedido.`;
+                return botResponse;
+            } else {
+                botResponse = 'Lo siento, estamos cerrados 😔\n';
+                botResponse += getHorarios();
                 return botResponse;
             }
         });
 
-        botResponse = 'Lo siento, estamos cerrados 😔\n';
-        botResponse += await getHorarios();
-        return botResponse;
+        return botResponse
 
     } catch (error) {
         console.error(error)
